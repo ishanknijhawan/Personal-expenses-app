@@ -4,7 +4,12 @@ import 'package:personal_expenses_app/widgets/transaction_list.dart';
 import './widgets/new_transactions.dart';
 import 'models/transactions.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  //WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -68,23 +73,23 @@ class _MyHomePageState extends State<MyHomePage> {
     Transactions(
         id: "two",
         title: "title2",
-        amount: 50,
-        date: DateTime.now().subtract(Duration(days: 1))),
+        amount: 150,
+        date: DateTime.now().subtract(Duration(days: 2))),
     Transactions(
         id: "two",
         title: "title2",
-        amount: 50,
-        date: DateTime.now().subtract(Duration(days: 1))),
+        amount: 80,
+        date: DateTime.now().subtract(Duration(days: 3))),
     Transactions(
         id: "two",
         title: "title2",
-        amount: 50,
-        date: DateTime.now().subtract(Duration(days: 1))),
+        amount: 120,
+        date: DateTime.now().subtract(Duration(days: 4))),
     Transactions(
         id: "two",
         title: "title2",
-        amount: 50,
-        date: DateTime.now().subtract(Duration(days: 1))),
+        amount: 29.99,
+        date: DateTime.now().subtract(Duration(days: 5))),
   ];
 
   List<Transactions> get _recentTransactions {
@@ -117,8 +122,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  bool showChart = false;
   @override
   Widget build(BuildContext context) {
+    final isLandScape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     final appBar = AppBar(
       title: Text('Personal Expenses'),
       actions: <Widget>[
@@ -130,6 +138,13 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       ],
     );
+    final txWidget = Container(
+      height: (MediaQuery.of(context).size.height -
+              appBar.preferredSize.height -
+              MediaQuery.of(context).padding.top) *
+          0.75,
+      child: TransactionList(_userTransactions, _deleteTransaction),
+    );
     return Scaffold(
       appBar: appBar,
       body: SingleChildScrollView(
@@ -137,22 +152,44 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.white,
           child: Column(
             children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(10),
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.25,
-                width: double.infinity,
-                child: Chart(_recentTransactions),
-              ),
-              Container(
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.75,
-                child: TransactionList(_userTransactions, _deleteTransaction),
-              )
+              if (isLandScape)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('Show Chart ',
+                        style: Theme.of(context).textTheme.headline6),
+                    Switch(
+                        value: showChart,
+                        onChanged: (value) {
+                          setState(() {
+                            showChart = value;
+                          });
+                        }),
+                  ],
+                ),
+              if (!isLandScape)
+                Container(
+                  padding: EdgeInsets.all(10),
+                  height: (MediaQuery.of(context).size.height -
+                          appBar.preferredSize.height -
+                          MediaQuery.of(context).padding.top) *
+                      0.25,
+                  width: double.infinity,
+                  child: Chart(_recentTransactions),
+                ),
+              if (!isLandScape) txWidget,
+              if (isLandScape)
+                showChart
+                    ? Container(
+                        padding: EdgeInsets.all(10),
+                        height: (MediaQuery.of(context).size.height -
+                                appBar.preferredSize.height -
+                                MediaQuery.of(context).padding.top) *
+                            0.7,
+                        width: double.infinity,
+                        child: Chart(_recentTransactions),
+                      )
+                    : txWidget,
             ],
           ),
         ),
