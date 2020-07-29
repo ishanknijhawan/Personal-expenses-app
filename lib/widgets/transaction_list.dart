@@ -117,7 +117,6 @@ class _TransactionListState extends State<TransactionList> {
       );
     } else {
       return Container(
-        height: 500,
         child: ListView.builder(
           itemCount: widget.transactions.length,
           itemBuilder: (context, index) {
