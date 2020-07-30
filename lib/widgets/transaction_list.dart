@@ -142,16 +142,34 @@ class _TransactionListState extends State<TransactionList> {
                 subtitle: Text(
                   DateFormat.yMMMd().format(widget.transactions[index].date),
                 ),
-                trailing: IconButton(
-                  color: Colors.red,
-                  onPressed: () {
-                    widget.deleteTransactions(widget.transactions[index].id);
-                  },
-                  icon: Icon(Icons.delete),
-                ),
+                //don't user MediaQuery.of(context) everytime, instead just declare in the
+                //beginning of build method like so: mediaQuery = MediaQuery.of(context);
+                trailing: MediaQuery.of(context).size.width < 400
+                    ? IconButton(
+                        color: Colors.red,
+                        onPressed: () {
+                          widget.deleteTransactions(
+                              widget.transactions[index].id);
+                        },
+                        icon: Icon(Icons.delete),
+                      )
+                    : FlatButton.icon(
+                        onPressed: () {
+                          widget.deleteTransactions(
+                              widget.transactions[index].id);
+                        },
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).errorColor,
+                        ),
+                        label: Text('Delete'),
+                      ),
               ),
             );
           },
+          //can convert ListView to GridView by using this Grid Delegate
+          // gridDelegate:
+          //     SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         ),
       );
     }

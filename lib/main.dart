@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_expenses_app/widgets/chart.dart';
 import 'package:personal_expenses_app/widgets/transaction_list.dart';
@@ -127,80 +130,137 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final isLandScape =
         MediaQuery.of(context).orientation == Orientation.landscape;
-    final appBar = AppBar(
-      title: Text('Personal Expenses'),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            startAddNewTransaction(context);
-          },
-        )
-      ],
-    );
+    //specifically declare type to set preferred size property to cupertino nav bar
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text('Personal Expenses'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  child: Icon(CupertinoIcons.add),
+                  onTap: () {
+                    startAddNewTransaction(context);
+                  },
+                )
+              ],
+            ),
+          )
+        : AppBar(
+            title: Text('Personal Expenses'),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  startAddNewTransaction(context);
+                },
+              )
+            ],
+          );
     final txWidget = Container(
       height: (MediaQuery.of(context).size.height -
-              appBar.preferredSize.height -
+              appBar.preferredSize.height * 2 -
               MediaQuery.of(context).padding.top) *
           0.75,
       child: TransactionList(_userTransactions, _deleteTransaction),
     );
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
-        child: Container(
-          color: Colors.white,
-          child: Column(
-            children: <Widget>[
-              if (isLandScape)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Show Chart ',
-                        style: Theme.of(context).textTheme.headline6),
-                    Switch(
-                        value: showChart,
-                        onChanged: (value) {
-                          setState(() {
-                            showChart = value;
-                          });
-                        }),
-                  ],
-                ),
-              if (!isLandScape)
-                Container(
-                  padding: EdgeInsets.all(10),
-                  height: (MediaQuery.of(context).size.height -
-                          appBar.preferredSize.height -
-                          MediaQuery.of(context).padding.top) *
-                      0.25,
-                  width: double.infinity,
-                  child: Chart(_recentTransactions),
-                ),
-              if (!isLandScape) txWidget,
-              if (isLandScape)
-                showChart
-                    ? Container(
-                        padding: EdgeInsets.all(10),
-                        height: (MediaQuery.of(context).size.height -
-                                appBar.preferredSize.height -
-                                MediaQuery.of(context).padding.top) *
-                            0.7,
-                        width: double.infinity,
-                        child: Chart(_recentTransactions),
-                      )
-                    : txWidget,
-            ],
-          ),
+    final pageBody = SingleChildScrollView(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          children: <Widget>[
+            if (isLandScape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Show Chart ',
+                      style: Theme.of(context).textTheme.headline6),
+                  //adaptive style for android and iOS
+                  Switch.adaptive(
+                      value: showChart,
+                      onChanged: (value) {
+                        setState(() {
+                          showChart = value;
+                        });
+                      }),
+                ],
+              ),
+            if (!isLandScape)
+              Container(
+                padding: EdgeInsets.all(10),
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.25,
+                width: double.infinity,
+                child: Chart(_recentTransactions),
+              ),
+            if (!isLandScape) txWidget,
+            if (isLandScape)
+              showChart
+                  ? Container(
+                      padding: EdgeInsets.all(10),
+                      height: (MediaQuery.of(context).size.height -
+                              appBar.preferredSize.height -
+                              MediaQuery.of(context).padding.top) *
+                          0.7,
+                      width: double.infinity,
+                      child: Chart(_recentTransactions),
+                    )
+                  : txWidget,
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          startAddNewTransaction(context);
-        },
-        label: Text('Add Transaction'),
-        icon: Icon(Icons.translate),
-      ),
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            navigationBar: appBar,
+            child: SafeArea(child: pageBody),
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: SafeArea(
+              child: pageBody,
+            ),
+            bottomNavigationBar: BottomAppBar(
+              color: Colors.deepPurple,
+              shape: CircularNotchedRectangle(),
+              child: Container(
+                height: appBar.preferredSize.height,
+                child: Row(
+                  children: <Widget>[
+                    IconButton(
+                        icon: Icon(
+                          Icons.account_balance_wallet,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {})
+                  ],
+                ),
+              ),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(
+                      Icons.add,
+                    ),
+                    backgroundColor: Colors.deepOrangeAccent,
+                    tooltip: 'Add',
+                    onPressed: () {
+                      startAddNewTransaction(context);
+                    },
+                  )
+            // : FloatingActionButton.extended(
+            //     onPressed: () {
+            //       startAddNewTransaction(context);
+            //     },
+            //     label: Text('Add Transaction'),
+            //     icon: Icon(Icons.translate),
+            //   ),
+            );
   }
 }
