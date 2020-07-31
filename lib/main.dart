@@ -6,6 +6,7 @@ import 'package:personal_expenses_app/widgets/chart.dart';
 import 'package:personal_expenses_app/widgets/transaction_list.dart';
 import './widgets/new_transactions.dart';
 import 'models/transactions.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   //WidgetsFlutterBinding.ensureInitialized();
@@ -152,6 +153,15 @@ class _MyHomePageState extends State<MyHomePage> {
               IconButton(
                 icon: Icon(Icons.add),
                 onPressed: () {
+                  //FlutterToast not working :(
+                  Fluttertoast.showToast(
+                      msg: "This is Center Short Toast",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
                   startAddNewTransaction(context);
                 },
               )
@@ -235,7 +245,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           Icons.account_balance_wallet,
                           color: Colors.white,
                         ),
-                        onPressed: () {})
+                        onPressed: () {
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text("Sending Message"),
+                          ));
+                        })
                   ],
                 ),
               ),
